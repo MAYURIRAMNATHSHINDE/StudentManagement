@@ -813,71 +813,71 @@ document.getElementById("searchInput").addEventListener("keypress", function (ev
       handleSearch();
   }
 });
-// function handleSearch() {
-//   const searchTerm = document.getElementById("searchInput").value.trim();
-//   const resultsContainer = document.getElementById("results");
+function handleSearch() {
+  const searchTerm = document.getElementById("searchInput").value.trim();
+  const resultsContainer = document.getElementById("results");
 
-//   if (!searchTerm) {
-//       resultsContainer.innerHTML = "<p>Please enter a search term.</p>";
-//       console.log("No search term provided");
-//       return;
-//   }
+  if (!searchTerm) {
+      resultsContainer.innerHTML = "<p>Please enter a search term.</p>";
+      console.log("No search term provided");
+      return;
+  }
 
-//   const apiUrl = `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`;
-//   console.log("Fetching from API:", apiUrl); // Log API request URL
+  const apiUrl = `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`;
+  console.log("Fetching from API:", apiUrl); // Log API request URL
 
-//   fetch(apiUrl)
-//       .then(response => {
-//           console.log("📡 API Response Received:", response);
-//           return response.json();
-//       })
-//       .then(data => {
-//           console.log("📊 Data from API:", data); // Log the API response data
-//           resultsContainer.innerHTML = ""; // Clear previous results
-//           if (data.length === 0) {
-//               resultsContainer.innerHTML = "<p>No results found.</p>";
-//           } else {
-//               data.forEach(student => {
-//                   const div = document.createElement("div");
-//                   div.innerHTML = `<p><strong>Name:</strong> ${student.students.name} <br>
-//                                    <strong>Email:</strong> ${student.students.email} <br>
-//                                    <strong>Course:</strong> ${student.students.course}</p>`;
-//                   resultsContainer.appendChild(div);
-//               });
-//           }
-//       })
-//       .catch(error => {
-//           console.error("Error fetching search results:", error);
-//           resultsContainer.innerHTML = "<p>Error fetching results.</p>";
-//       });
-// }
+  fetch(apiUrl)
+      .then(response => {
+          console.log("📡 API Response Received:", response);
+          return response.json();
+      })
+      .then(data => {
+          console.log("📊 Data from API:", data); // Log the API response data
+          resultsContainer.innerHTML = ""; // Clear previous results
+          if (data.length === 0) {
+              resultsContainer.innerHTML = "<p>No results found.</p>";
+          } else {
+              data.forEach(student => {
+                  const div = document.createElement("div");
+                  div.innerHTML = `<p><strong>Name:</strong> ${student.students.name} <br>
+                                   <strong>Email:</strong> ${student.students.email} <br>
+                                   <strong>Course:</strong> ${student.students.course}</p>`;
+                  resultsContainer.appendChild(div);
+              });
+          }
+      })
+      .catch(error => {
+          console.error("Error fetching search results:", error);
+          resultsContainer.innerHTML = "<p>Error fetching results.</p>";
+      });
+}
 
-// let searchTimeout;
-//       function handleSearch(e) {
-//         clearTimeout(searchTimeout);
-//         const searchTerm = e.target.value.trim();
+let searchTimeout;
+      function handleSearch(e) {
+        clearTimeout(searchTimeout);
+        const searchTerm = e.target.value.trim();
 
-//         searchTimeout = setTimeout(async () => {
-//           if (searchTerm.length === 0) {
-//             await loadStudents();
-//             return;
-//           }
+        searchTimeout = setTimeout(async () => {
+          if (searchTerm.length === 0) {
+            await loadStudents();
+            return;
+          }
 
-//           showLoading();
-//           try {
-//             const response = await fetch(`http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`);
-//             if (!response.ok) throw new Error("Search failed");
+          showLoading();
+          try {
+            const response = await fetch(`http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`);
+            if (!response.ok) throw new Error("Search failed");
 
-//             const filteredStudents = await response.json();
-//             renderStudentTables(filteredStudents);
-//           } catch (error) {
-//             console.error("Error searching students:", error);
-//             showNotification("Error searching students", "error");
-//           } finally {
-//             hideLoading();
-//           }
-//         }, 300); // Debounce search requests
-//       }
+            const filteredStudents = await response.json();
+            renderStudentTables(filteredStudents);
+          } catch (error) {
+            console.error("Error searching students:", error);
+            showNotification("Error searching students", "error");
+          } finally {
+            hideLoading();
+          }
+        }, 300); // Debounce search requests
+      }
 
 function formatDate(dateString) {
   const options = { year: "numeric", month: "short", day: "numeric" };
