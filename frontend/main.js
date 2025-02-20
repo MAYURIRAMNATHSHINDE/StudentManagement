@@ -110,7 +110,7 @@ function navigateToSection(section) {
 
 async function updateDashboardStats() {
   try {
-    const response = await fetch(`http://localhost:8080/student/api/dashboard/stats`);
+    const response = await fetch(`https://student-management-oz1x.onrender.com/student/api/dashboard/stats`);
     if (!response.ok) throw new Error("Failed to fetch dashboard stats");
 
     const responseData = await response.json();  
@@ -142,7 +142,7 @@ async function updateDashboardStats() {
 
 async function loadStudents() {
   try {
-    const response = await fetch("http://localhost:8080/student/api/std");
+    const response = await fetch("https://student-management-oz1x.onrender.com/student/api/std");
     if (!response.ok) throw new Error("Failed to fetch students");
 
     const data = await response.json();
@@ -164,7 +164,7 @@ async function loadStudents() {
 async function loadCourses() {
   try {
     showLoading();
-    const response = await fetch("http://localhost:8080/course/api/courses");
+    const response = await fetch("https://student-management-oz1x.onrender.com/course/api/courses");
     const data = await response.json();
 
     console.log("Courses API Response:", data); // Debugging
@@ -194,7 +194,7 @@ async function loadCourses() {
 async function createStudent(studentData) {
   console.log("Final Student Data Sent to API:", studentData);
 
-  const response = await fetch("http://localhost:8080/student/api/std", {
+  const response = await fetch("https://student-management-oz1x.onrender.com/student/api/std", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(studentData),
@@ -225,7 +225,7 @@ async function createCourse(courseData) {
   try {
     console.log("Course Data Being Sent:", JSON.stringify(courseData, null, 2));
 
-    const apiUrl = "http://localhost:8080/course/api/courses";
+    const apiUrl = "https://student-management-oz1x.onrender.com/course/api/courses";
     console.log("API URL Being Called:", apiUrl);
 
     const response = await fetch(apiUrl, {
@@ -256,7 +256,7 @@ async function createCourse(courseData) {
 
 async function updateCourse(id, courseData) {
   try {
-    const response = await fetch(`http://localhost:8080/course/api/courses/${id}`, {
+    const response = await fetch(`https://student-management-oz1x.onrender.com/course/api/courses/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(courseData),
@@ -316,7 +316,7 @@ async function confirmDelete(deleteId) {
   try {
     if (deleteType === "student") {
       const response = await fetch(
-        `http://localhost:8080/student/api/std/${deleteId}`,
+        `https://student-management-oz1x.onrender.com/student/api/std/${deleteId}`,
         {
           method: "DELETE",
         }
@@ -331,7 +331,7 @@ async function confirmDelete(deleteId) {
       await updateDashboardStats();
     } else if (deleteType === "course") {
       const response = await fetch(
-        `http://localhost:8080/course/api/courses/${deleteId}`,
+        `https://student-management-oz1x.onrender.com/course/api/courses/${deleteId}`,
         {
           method: "DELETE",
         }
@@ -425,7 +425,7 @@ async function updateStudent(id, studentData) {
   console.log("Updating Student with ID:", id);
   console.log("Data Sent to API:", JSON.stringify(studentData, null, 2));
 
-  const response = await fetch(`http://localhost:8080/student/api/std/${id}`, {
+  const response = await fetch(`https://student-management-oz1x.onrender.com/student/api/std/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(studentData),
@@ -642,7 +642,7 @@ async function editStudent(id) {
   try {
     console.log(`Fetching student with ID: ${id}...`);
 
-    const response = await fetch(`http://localhost:8080/student/api/std/${id}`);
+    const response = await fetch(`https://student-management-oz1x.onrender.com/student/api/std/${id}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -697,7 +697,7 @@ async function editCourse(id) {
   try {
     console.log(`Fetching course with ID: ${id}`);
 
-    const response = await fetch(`http://localhost:8080/course/api/courses/${id}`);
+    const response = await fetch(`https://student-management-oz1x.onrender.com/course/api/courses/${id}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch course: ${await response.text()}`);
     }
@@ -731,7 +731,7 @@ async function editCourse(id) {
 
 async function fetchAndRenderStudents() {
   try {
-    const response = await fetch(`http://localhost:8080/student/api/std`);
+    const response = await fetch(`https://student-management-oz1x.onrender.com/student/api/std`);
     const students = await response.json();
 
     if (!response.ok) {
@@ -823,7 +823,7 @@ function handleSearch() {
       return;
   }
 
-  const apiUrl = `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`;
+  const apiUrl = `https://student-management-oz1x.onrender.com/student/api/std/search?q=${encodeURIComponent(searchTerm)}`;
   console.log("Fetching from API:", apiUrl); // Log API request URL
 
   fetch(apiUrl)
@@ -865,7 +865,7 @@ let searchTimeout;
 
           showLoading();
           try {
-            const response = await fetch(`http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`);
+            const response = await fetch(`https://student-management-oz1x.onrender.com/student/api/std/search?q=${encodeURIComponent(searchTerm)}`);
             if (!response.ok) throw new Error("Search failed");
 
             const filteredStudents = await response.json();
