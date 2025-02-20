@@ -33,15 +33,25 @@ courseRoute.get("/api/courses/:id",async(req,res)=>{
 })
 
 
-courseRoute.post("/api/courses",async (req,res)=>{
-    try{
-        const course= await courseModel.create(req.body)
-        res.status(200).json({msg:"Students courses created:",course})
-    }catch(err){
-        console.log(err);
-        res.status(400).json({msg:"error occured while creating courses..."})
+courseRoute.post("/api/courses", async (req, res) => {
+    try {
+      const { name, description, duration, status } = req.body;
+  
+      if (!name || !description || !duration || !status) {
+        return res.status(400).json({ msg: "All fields are required" });
+      }
+  
+      const newCourse = new courseModel({ name, description, duration, status });
+      await newCourse.save();
+  
+      res.status(201).json({ msg: "Course created successfully", course: newCourse });
+    } catch (error) {
+      console.error("Error creating course:", error);
+      res.status(500).json({ msg: "Error creating course", error: error.message });
     }
-})
+  });
+  
+
 
 courseRoute.patch("/api/courses/:id",async (req,res)=>{
     try{

@@ -50,8 +50,11 @@
       <div class="header">
         <div class="search-bar">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search students..." />
-        </div>
+          <input type="text" id="searchInput" placeholder="Search students..." />
+          <button onclick="handleSearch(e)" style="border: none; padding:3px;color:none">Search</button> <!-- Add a button -->
+      </div>
+      <div id="results"></div> 
+      
         <div class="user-profile">
           <div class="user-avatar">
             <i class="fas fa-user"></i>
@@ -178,7 +181,7 @@
               </tr>
             </thead>
             <tbody id="courseTableBody">
-
+<th>edit button</th>
             </tbody>
           </table>
         </div>
@@ -206,21 +209,23 @@
       <form id="studentForm">
         <div class="form-group">
           <label for="studentName">Full Name</label>
-          <input type="text" id="studentName" required />
+          <input type="text" id="studentName" name="name" placeholder="Enter Name" />
         </div>
         <div class="form-group">
           <label for="studentEmail">Email</label>
-          <input type="email" id="studentEmail" required />
+          <input type="email" id="studentEmail" name="email" placeholder="Enter Email" />
         </div>
         <div class="form-group">
           <label for="studentCourse">Course</label>
           <select id="studentCourse" required>
-            <option value="">Select Course</option>
+            <option value=`${student.students._id}`>Select Course</option>
           </select>
         </div>
         <div class="form-group">
           <label for="enrollmentDate">Enrollment Date</label>
-          <input type="date" id="enrollmentDate" required />
+          <!-- <input type="date" id="enrollmentDate" name="enrollmentDate" /> -->
+          <input type="date" id="enrollmentDate" name="enrollmentDate" required>
+
         </div>
         <button type="submit" class="submit-btn">Save Student</button>
       </form>
@@ -273,7 +278,7 @@
         </div>
         <div class="form-group">
           <label for="courseDuration">Duration (months)</label>
-          <input type="number" id="courseDuration" required min="1" />
+          <input type="text" id="courseDuration" required min="1" />
         </div>
         <div class="form-group">
           <label for="courseStatus">Status</label>

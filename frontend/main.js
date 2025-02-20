@@ -140,39 +140,6 @@ async function updateDashboardStats() {
   }
 }
 
-// async function loadStudents() {
-//   try {
-//     const response = await fetch(`http://localhost:8080/student/api/std`);
-//     if (!response.ok) throw new Error("Failed to fetch students");
-
-//     students = await response.json();
-//     renderStudentTables(students);
-//   } catch (error) {
-//     console.error("Error loading students:", error);
-//     showNotification("Error loading students", "error");
-//     students = [];
-//     renderStudentTables([]);
-//   }
-// }
-// async function loadStudents() {
-//   try {
-//     const response = await fetch("http://localhost:8080/student/api/std");
-//     if (!response.ok) throw new Error("Failed to fetch students");
-
-//     const data = await response.json();
-//     console.log("Students API Response:", data);
-
-//     // Extract the correct array
-//     if (!Array.isArray(data.course)) {
-//       throw new Error("Invalid students data: Expected an array");
-//     }
-
-//     renderStudentTables(data.course);  // ✅ Pass only the array
-//   } catch (error) {
-//     console.error("Error loading students:", error);
-//     showNotification("Error loading students", "error");
-//   }
-// }
 async function loadStudents() {
   try {
     const response = await fetch("http://localhost:8080/student/api/std");
@@ -194,22 +161,6 @@ async function loadStudents() {
 }
 
 
-// async function loadCourses() {
-//   try {
-//     const response = await fetch(`http://localhost:8080/course/api/courses`);
-//     if (!response.ok) throw new Error("Failed to fetch courses");
-
-//     courses = await response.json();
-//     updateCourseDropdown(courses);
-//     renderCourseTable(courses);
-//     return courses;
-//   } catch (error) {
-//     console.error("Error loading courses:", error);
-//     showNotification("Error loading courses", "error");
-//     courses = [];
-//     renderCourseTable([]);
-//   }
-// }
 async function loadCourses() {
   try {
     showLoading();
@@ -238,106 +189,46 @@ async function loadCourses() {
   }
 }
 
-
 // CRUD Operations for Students
-// async function createStudent(studentData) {
-//   try {
-//     const response = await fetch("http://localhost:8080/student/api/std", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(studentData),
-//     });
 
-//     const contentType = response.headers.get("content-type");
-
-//     if (!contentType || !contentType.includes("application/json")) {
-//       const textResponse = await response.text();
-//       console.error("Invalid API Response:", textResponse);
-//       throw new Error(`Unexpected response: ${textResponse}`);
-//     }
-
-//     const data = await response.json();
-//     console.log("Server Response:", data);
-
-//     if (!response.ok) {
-//       throw new Error(data.message || "Failed to create student");
-//     }
-
-//     return data;
-//   } catch (error) {
-//     console.error("Error creating student:", error);
-//     throw error;
-//   }
-// }
 async function createStudent(studentData) {
-  try {
-    const response = await fetch("http://localhost:8080/student/api/std", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(studentData),
-    });
+  console.log("Final Student Data Sent to API:", studentData);
 
-    const responseData = await response.json(); // Try to parse JSON
-    console.log("Server Response:", responseData); // Log full response
-
-    if (!response.ok) {
-      throw new Error(responseData.msg || "Failed to create student");
-    }
-
-    return responseData;
-  } catch (error) {
-    console.error("Error creating student:", error);
-    throw error;
-  }
-}
-
-// async function updateStudent(id, studentData) {
-//   const response = await fetch(`http://localhost:8080/student/api/std/${id}`, {
-//     method: "PATCH",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(studentData),
-//   });
-
-//   if (!response.ok) {
-//     const error = await response.json();
-//     throw new Error(error.message || "Failed to update student");
-//   }
-
-//   return response.json();
-// }
-async function updateStudent(id, studentData) {
-  const response = await fetch(`http://localhost:8080/student/api/std/${id}`, {
-    method: "PATCH",
+  const response = await fetch("http://localhost:8080/student/api/std", {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(studentData),
   });
-  
+
+  const responseText = await response.text();
+  console.log("Raw API Response:", responseText);
 
   if (!response.ok) {
-    let errorMessage = "Failed to update student";
-    try {
-      const error = await response.json();
-      errorMessage = error.message || errorMessage;
-    } catch (e) {
-      console.error("Error parsing error response:", e);
-    }
-    throw new Error(errorMessage);
+    console.error(`API Error ${response.status}: ${responseText}`);
+    throw new Error(responseText || "Unknown API error");
   }
 
-  return response.json();
+  return JSON.parse(responseText);
 }
 
 async function deleteStudent(id) {
   deleteType = "student";
   deleteId = id;
+  console.log(deleteId)
   document.getElementById("deleteConfirmationModal").style.display =
     "flex";
+    confirmDelete(deleteId,deleteType)
 }
 
 
 async function createCourse(courseData) {
   try {
-    const response = await fetch("http://localhost:8080/course/api/courses", {
+    console.log("Course Data Being Sent:", JSON.stringify(courseData, null, 2));
+
+    const apiUrl = "http://localhost:8080/course/api/courses";
+    console.log("API URL Being Called:", apiUrl);
+
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -345,55 +236,74 @@ async function createCourse(courseData) {
       body: JSON.stringify(courseData),
     });
 
-    // Log raw response
+    console.log("Raw API Response Status:", response.status);
     const text = await response.text();
-    console.log("Raw API Response:", text);
-
-    // Handle non-JSON responses
-    const contentType = response.headers.get("content-type");
-    let data;
-    
-    if (contentType && contentType.includes("application/json")) {
-      data = JSON.parse(text);
-    } else {
-      throw new Error(`Invalid response format: Expected JSON but got ${contentType}`);
-    }
+    console.log("Raw API Response Body:", text);
 
     if (!response.ok) {
       throw new Error(`Failed to create course: ${response.status} - ${text}`);
     }
 
+    const data = JSON.parse(text);
     console.log("Course created successfully:", data);
     return data;
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error creating course:", error);
     showNotification("Error creating course", "error");
   }
 }
 
+
 async function updateCourse(id, courseData) {
-  const response = await fetch(`http://localhost:8080/course/api/courses/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(courseData),
-  });
+  try {
+    const response = await fetch(`http://localhost:8080/course/api/courses/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(courseData),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to update course");
+    console.log(`Updating course ID: ${id}`);
+
+    const text = await response.text(); // Read raw response first
+    console.log("Raw API Response Body:", text);
+
+    // Handle JSON responses safely
+    let data;
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error("Invalid JSON format in response");
+      }
+    } else {
+      throw new Error(`Unexpected response type: ${contentType}`);
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to update course: ${response.status} - ${text}`);
+    }
+
+    console.log("Course updated successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error updating course:", error);
+    showNotification("Error updating course", "error");
   }
-
-  return response.json();
 }
+
 
 async function deleteCourse(id) {
   deleteType = "course";
   deleteId = id;
+  console.log(deleteId)
   document.getElementById("deleteConfirmationModal").style.display =
     "flex";
+    confirmDelete(deleteId,deleteType)
 }
 
-function closeDeleteModal() {
+function closeDeleteModal(deleteId) {
   document.getElementById("deleteConfirmationModal").style.display =
     "none";
   deleteType = "";
@@ -401,12 +311,12 @@ function closeDeleteModal() {
 }
 
 
-async function confirmDelete() {
+async function confirmDelete(deleteId) {
   showLoading();
   try {
     if (deleteType === "student") {
       const response = await fetch(
-        `http://localhost:8080/student/api/students/${id}`,
+        `http://localhost:8080/student/api/std/${deleteId}`,
         {
           method: "DELETE",
         }
@@ -421,7 +331,7 @@ async function confirmDelete() {
       await updateDashboardStats();
     } else if (deleteType === "course") {
       const response = await fetch(
-        `http://localhost:8080/student/api/students/${deleteId}`,
+        `http://localhost:8080/course/api/courses/${deleteId}`,
         {
           method: "DELETE",
         }
@@ -445,43 +355,105 @@ async function confirmDelete() {
   }
 }
 
+
 async function handleFormSubmit(e) {
   e.preventDefault();
   showLoading();
 
+  // Ensure enrollment date is properly set
+  const enrollmentDateField = document.getElementById("enrollmentDate");
+  if (!enrollmentDateField) {
+    console.error("Enrollment Date field not found!");
+    showNotification("Enrollment Date field is missing!", "error");
+    hideLoading();
+    return;
+  }
+
+  console.log("Enrollment Date Before Reading:", enrollmentDateField.value);
+
+  // Collect student data from the form
   const studentData = {
-    name: document.getElementById("studentName").value.trim(),
-    email: document.getElementById("studentEmail").value.trim(),
-    course: document.getElementById("studentCourse").value,
-    enrollmentDate: document.getElementById("enrollmentDate").value,
+    name: document.getElementById("studentName")?.value?.trim() || "",
+    email: document.getElementById("studentEmail")?.value?.trim() || "",
+    course: [document.getElementById("studentCourse")?.value] || "",
+    enrollmentDate: enrollmentDateField.value || "",
     status: "active",
   };
 
-  try {
-    const response = editingId 
-      ? await updateStudent(editingId, studentData)
-      : await createStudent(studentData);
-
-    console.log("API Response:", response); // ✅ Debugging
-
-    if (!response || typeof response !== "object") {
-      throw new Error("Invalid API response.");
-    }
-
-    showNotification(
-      editingId ? "Student updated successfully" : "Student created successfully",
-      "success"
-    );
-
-    closeModal();
-    await loadStudents();
-    await updateDashboardStats();
-  } catch (error) {
-    console.error("Error:", error);
-    showNotification("Error saving student data", "error");
-  } finally {
+  if (!studentData.enrollmentDate) {
+    console.error("Enrollment Date is empty!");
+    showNotification("Enrollment Date is required!", "error");
     hideLoading();
+    return;
   }
+
+  console.log("Submitting Student Data:", JSON.stringify(studentData, null, 2));
+ 
+  try {
+        const response = editingId
+          ? await updateStudent(editingId, studentData)
+          : await createStudent(studentData);
+    
+        console.log("API Response:", response);
+    
+        if (!response || typeof response !== "object") {
+          throw new Error("Invalid API response.");
+        }
+    
+        showNotification(
+          editingId ? "Student updated successfully" : "Student created successfully",
+          "success"
+        );
+    
+        closeModal();
+        await loadStudents();
+        await updateDashboardStats();
+      } catch (error) {
+        console.error("Error:", error);
+        showNotification("Error saving student data", "error");
+      } finally {
+        hideLoading();
+      }
+}
+
+async function updateStudent(id, studentData) {
+  if (!id) {
+    console.error("Error: Missing student ID!");
+    return;
+  }
+
+  console.log("Updating Student with ID:", id);
+  console.log("Data Sent to API:", JSON.stringify(studentData, null, 2));
+
+  const response = await fetch(`http://localhost:8080/student/api/std/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(studentData),
+  });
+
+  console.log("Raw API Response:", response);
+
+  let responseText;
+  try {
+    responseText = await response.text();
+    console.log("Full API Response Body:", responseText);
+  } catch (e) {
+    console.error("Error reading response body:", e);
+  }
+
+  if (!response.ok) {
+    let errorMessage = `Failed to update student - Status: ${response.status}`;
+    try {
+      const errorJson = JSON.parse(responseText);
+      errorMessage = errorJson.message || errorMessage;
+    } catch (e) {
+      console.error("Error parsing JSON response:", e);
+    }
+    console.error("API Error:", errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  return JSON.parse(responseText);
 }
 
 
@@ -491,24 +463,30 @@ async function handleCourseFormSubmit(e) {
 
   const courseData = {
     name: document.getElementById("courseName").value.trim(),
-    description: document
-      .getElementById("courseDescription")
-      .value.trim(),
-    duration: parseInt(document.getElementById("courseDuration").value),
+    description: document.getElementById("courseDescription").value.trim(),
+    duration: String(document.getElementById("courseDuration").value),
     status: document.getElementById("courseStatus").value,
   };
 
+  console.log("Course Data Being Sent:", courseData);
+  console.log("Current Editing Course ID:", editingCourseId); 
+
   try {
     if (editingCourseId) {
+      console.log(`Updating course with ID: ${editingCourseId}`);
       await updateCourse(editingCourseId, courseData);
       showNotification("Course updated successfully", "success");
     } else {
+      console.log("Creating new course...");
       await createCourse(courseData);
       showNotification("Course created successfully", "success");
     }
+
     closeCourseModal();
     await loadCourses();
     await updateDashboardStats();
+    
+    editingCourseId = null; 
   } catch (error) {
     console.error("Error:", error);
     showNotification("Error saving course data", "error");
@@ -558,6 +536,7 @@ function renderStudentTables(studentsToRender) {
           </span>
         </td>
         <td class="action-buttons">
+          
           <button class="action-btn edit-btn" onclick="editStudent('${student._id}')">
             <i class="fas fa-edit"></i> Edit
           </button>
@@ -657,149 +636,52 @@ function closeCourseModal() {
   courseForm.reset();
 }
 
-// Update the editStudent function
-// async function editStudent(id) {
-//   showLoading();
-//   try {
-//     const response = await fetch(`http://localhost:8080/student/api/students/${id}`);
-//     if (!response.ok) {
-//       const error = await response.json();
-//       throw new Error(error.message || "Failed to fetch student");
-//     }
-
-//     const student = await response.json();
-
-//     editingId = id;
-//     document.getElementById("modalTitle").textContent = "Edit Student";
-//     document.getElementById("studentName").value = student.name;
-//     document.getElementById("studentEmail").value = student.email;
-//     document.getElementById("studentCourse").value = student.course;
-//     document.getElementById("enrollmentDate").value = formatDateForInput(
-//       student.enrollmentDate
-//     );
-
-//     studentModal.style.display = "flex";
-//   } catch (error) {
-//     console.error("Error loading student for edit:", error);
-//     showNotification(
-//       error.message || "Error loading student data",
-//       "error"
-//     );
-//   } finally {
-//     hideLoading();
-//   }
-// }
-
-// Update the editCourse function
-// async function editCourse(id) {
-//   showLoading();
-//   try {
-//     const response = await fetch(`http://localhost:8080/course/api/courses/${id}`);
-//     if (!response.ok) {
-//       const error = await response.json();
-//       throw new Error(error.message || "Failed to fetch course");
-//     }
-
-//     const course = await response.json();
-
-//     editingCourseId = id;
-//     document.getElementById("courseModalTitle").textContent =
-//       "Edit Course";
-//     document.getElementById("courseName").value = course.name;
-//     document.getElementById("courseDescription").value =
-//       course.description;
-//     document.getElementById("courseDuration").value = course.duration;
-//     document.getElementById("courseStatus").value = course.status;
-
-//     courseModal.style.display = "flex";
-//   } catch (error) {
-//     console.error("Error loading course for edit:", error);
-//     showNotification(
-//       error.message || "Error loading course data",
-//       "error"
-//     );
-//   } finally {
-//     hideLoading();
-//   }
-// }
-// async function editStudent(id) {
-
-//   console.log("Editing Student with ID:", id); // Debugging
-
-//   if (!id) {
-//     console.error("Error: ID is undefined!");
-//     showNotification("Invalid student ID", "error");
-//   }
-//   showLoading();
-//   try {
-//     const response = await fetch(`http://localhost:8080/student/api/std/${id}`);
-
-//     // Check if the response is JSON
-//     const contentType = response.headers.get("content-type");
-//     if (!contentType || !contentType.includes("application/json")) {
-//       const text = await response.text();
-//       console.log(text)
-//       throw new Error(`Invalid response from server: ${text}`);
-//     }
-
-//     const data = await response.json();
-//     if (!response.ok) {
-//       throw new Error(data.error || "Failed to fetch student");
-//     }
-
-//     console.log("Fetched Student Data:", data);
-
-//     editingId = id;
-//     document.getElementById("modalTitle").textContent = "Edit Student";
-//     document.getElementById("studentName").value = data.name || "";
-//     document.getElementById("studentEmail").value = data.email || "";
-//     document.getElementById("studentCourse").value = data.course || "";
-//     document.getElementById("enrollmentDate").value = formatDateForInput(data.enrollmentDate || "");
-
-//     studentModal.style.display = "flex";
-//   } catch (error) {
-//     console.error("Error loading student for edit:", error);
-//     showNotification(error.message || "Error loading student data", "error");
-//   } finally {
-//     hideLoading();
-//   }
-// }
 
 async function editStudent(id) {
-  console.log("Editing Student with ID:", id); // Debugging
-
-  if (!id) {
-    console.error("Error: ID is undefined!");
-    showNotification("Invalid student ID", "error");
-    return; // Return early if the ID is not valid
-  }
-
   showLoading();
   try {
+    console.log(`Fetching student with ID: ${id}...`);
+
     const response = await fetch(`http://localhost:8080/student/api/std/${id}`);
 
-    // Check if the response is JSON
-    const contentType = response.headers.get("Content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      const text = await response.text();
-      console.log(text);
-      throw new Error(`Invalid response from server: ${text}`);
-    }
-
-    const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch student");
+      const errorText = await response.text();
+      console.error("Response Error:", errorText);
+      throw new Error(errorText || "Failed to fetch student");
     }
 
-    console.log("Fetched Student Data:", data);
+    // ✅ Log response before parsing
+    const responseText = await response.text();
+    console.log("Raw API Response:", responseText);
 
-    // Set modal content
+    // ✅ Prevent parsing empty response
+    if (!responseText) {
+      throw new Error("Empty response from server");
+    }
+
+    const student = JSON.parse(responseText);
+    console.log("Fetched Student Data:", student);
+
+    if (!student || Object.keys(student).length === 0) {
+      throw new Error("Student data is empty or undefined");
+    }
+
     editingId = id;
     document.getElementById("modalTitle").textContent = "Edit Student";
-    document.getElementById("studentName").value = data.name || "";
-    document.getElementById("studentEmail").value = data.email || "";
-    document.getElementById("studentCourse").value = data.course || "";
-    document.getElementById("enrollmentDate").value = formatDateForInput(data.enrollmentDate || "");
+    document.getElementById("studentName").value = student.students.name || "";
+    document.getElementById("studentEmail").value = student.students.email || "";
+    document.getElementById("studentCourse").value = student.students.course || "";
+    const dateObj = new Date(student.students.enrollmentDate);
+const formattedDate = dateObj.toISOString().split("T")[0]; // Converts to "2025-02-18"
+document.getElementById("enrollmentDate").value = formattedDate;
+
+    console.log("Final Input Values:");
+    console.log("Name:", document.getElementById("studentName").value);
+    console.log("Email:", document.getElementById("studentEmail").value);
+    console.log("Course:", [document.getElementById("studentCourse")?.value]);
+    console.log("Enrollment Date:", document.getElementById("enrollmentDate").value);
+    
+    
 
     studentModal.style.display = "flex";
   } catch (error) {
@@ -810,37 +692,192 @@ async function editStudent(id) {
   }
 }
 
-// Search Functionality
-let searchTimeout;
-function handleSearch(e) {
-  clearTimeout(searchTimeout);
-  const searchTerm = e.target.value.trim();
+async function editCourse(id) {
+  showLoading();
+  try {
+    console.log(`Fetching course with ID: ${id}`);
 
-  searchTimeout = setTimeout(async () => {
-    if (searchTerm.length === 0) {
-      await loadStudents();
-      return;
+    const response = await fetch(`http://localhost:8080/course/api/courses/${id}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch course: ${await response.text()}`);
     }
 
-    showLoading();
-    try {
-      const response = await fetch(
-        `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(
-          searchTerm
-        )}`
-      );
-      if (!response.ok) throw new Error("Search failed");
+    const course = await response.json();
+    console.log("Fetched Course Data:", course);
 
-      const filteredStudents = await response.json();
-      renderStudentTables(filteredStudents);
-    } catch (error) {
-      console.error("Error searching students:", error);
-      showNotification("Error searching students", "error");
-    } finally {
-      hideLoading();
+    if (!course || Object.keys(course).length === 0) {
+      throw new Error("Course data is empty or undefined");
     }
-  }, 300); // Debounce search requests
+
+    // ✅ Set editing mode
+    editingCourseId = id;
+    console.log("Editing Course ID Set:", editingCourseId);
+
+    // Populate the form with existing course details
+    document.getElementById("courseName").value = course.course.name || "";
+    document.getElementById("courseDescription").value = course.course.description || "";
+    document.getElementById("courseDuration").value = String(course.course.duration) || "";
+    document.getElementById("courseStatus").value = course.course.status || "active";
+
+    courseModal.style.display = "flex";
+  } catch (error) {
+    console.error("Error loading course for edit:", error);
+    showNotification(error.message || "Error loading course data", "error");
+  } finally {
+    hideLoading();
+  }
 }
+
+
+async function fetchAndRenderStudents() {
+  try {
+    const response = await fetch(`http://localhost:8080/student/api/std`);
+    const students = await response.json();
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch students");
+    }
+
+    renderStudentTables(students);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    showNotification("Failed to load student data", "error");
+  }
+}
+
+// Search Functionality
+// let searchTimeout;
+// function handleSearch(e) {
+//   clearTimeout(searchTimeout);
+//   const searchTerm = e.target.value.trim();
+
+//   searchTimeout = setTimeout(async () => {
+//     if (searchTerm.length === 0) {
+//       await loadStudents();
+//       return;
+//     }
+
+//     showLoading();
+//     try {
+//       const response = await fetch(
+//         `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(
+//           searchTerm
+//         )}`
+//       );
+//       if (!response.ok) throw new Error("Search failed");
+
+//       const filteredStudents = await response.json();
+//       renderStudentTables(filteredStudents);
+//     } catch (error) {
+//       console.error("Error searching students:", error);
+//       showNotification("Error searching students", "error");
+//     } finally {
+//       hideLoading();
+//     }
+//   }, 300); // Debounce search requests
+// }
+
+
+// function handleSearch(e) {
+//   const searchTerm = document.getElementById("searchInput").value.trim();
+//   const resultsContainer = document.getElementById("results");
+
+//   if (!searchTerm) {
+//       resultsContainer.innerHTML = "<p>Please enter a search term.</p>";
+//       return;
+//   }
+
+//   fetch(`http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`)
+//       .then(response => response.json())
+//       .then(data => {
+//           resultsContainer.innerHTML = ""; // Clear previous results
+//           if (data.length === 0) {
+//               resultsContainer.innerHTML = "<p>No results found.</p>";
+//           } else {
+//               data.forEach(student => {
+//                   const div = document.createElement("div");
+//                   div.innerHTML = `<p><strong>Name:</strong> ${student.name} <br>
+//                                    <strong>Email:</strong> ${student.email} <br>
+//                                    <strong>Course:</strong> ${student.course}</p>`;
+//                   resultsContainer.appendChild(div);
+//               });
+//           }
+//       })
+//       .catch(error => {
+//           console.error("Error fetching search results:", error);
+//           resultsContainer.innerHTML = "<p>Error fetching results.</p>";
+//       });
+// }
+document.getElementById("searchInput").addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+      handleSearch();
+  }
+});
+// function handleSearch() {
+//   const searchTerm = document.getElementById("searchInput").value.trim();
+//   const resultsContainer = document.getElementById("results");
+
+//   if (!searchTerm) {
+//       resultsContainer.innerHTML = "<p>Please enter a search term.</p>";
+//       console.log("No search term provided");
+//       return;
+//   }
+
+//   const apiUrl = `http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`;
+//   console.log("Fetching from API:", apiUrl); // Log API request URL
+
+//   fetch(apiUrl)
+//       .then(response => {
+//           console.log("📡 API Response Received:", response);
+//           return response.json();
+//       })
+//       .then(data => {
+//           console.log("📊 Data from API:", data); // Log the API response data
+//           resultsContainer.innerHTML = ""; // Clear previous results
+//           if (data.length === 0) {
+//               resultsContainer.innerHTML = "<p>No results found.</p>";
+//           } else {
+//               data.forEach(student => {
+//                   const div = document.createElement("div");
+//                   div.innerHTML = `<p><strong>Name:</strong> ${student.students.name} <br>
+//                                    <strong>Email:</strong> ${student.students.email} <br>
+//                                    <strong>Course:</strong> ${student.students.course}</p>`;
+//                   resultsContainer.appendChild(div);
+//               });
+//           }
+//       })
+//       .catch(error => {
+//           console.error("Error fetching search results:", error);
+//           resultsContainer.innerHTML = "<p>Error fetching results.</p>";
+//       });
+// }
+
+// let searchTimeout;
+//       function handleSearch(e) {
+//         clearTimeout(searchTimeout);
+//         const searchTerm = e.target.value.trim();
+
+//         searchTimeout = setTimeout(async () => {
+//           if (searchTerm.length === 0) {
+//             await loadStudents();
+//             return;
+//           }
+
+//           showLoading();
+//           try {
+//             const response = await fetch(`http://localhost:8080/student/api/std/search?q=${encodeURIComponent(searchTerm)}`);
+//             if (!response.ok) throw new Error("Search failed");
+
+//             const filteredStudents = await response.json();
+//             renderStudentTables(filteredStudents);
+//           } catch (error) {
+//             console.error("Error searching students:", error);
+//             showNotification("Error searching students", "error");
+//           } finally {
+//             hideLoading();
+//           }
+//         }, 300); // Debounce search requests
+//       }
 
 function formatDate(dateString) {
   const options = { year: "numeric", month: "short", day: "numeric" };

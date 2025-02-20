@@ -1,118 +1,9 @@
-// const express=require("express");
-// const studentModel = require("../model/student.model");
-// const courseModel = require("../model/course.model");
-const cors = require("cors");
 
-
-// const studentRoute=express.Router()
-
-// studentRoute.get("/api/std",async(req,res)=>{
-//     try{
-//     //     const course=await studentModel.find().sort({createdAt:-1});
-//     // res.status(200).json({msg:"Students List:",course})
-//     const students = await studentModel.find().populate("course").sort({ createdAt: -1 });
-// res.status(200).json({ msg: "Students List:", students });
-
-//     }catch(err){
-//         console.log(err);
-//         res.status(500).json({msg:"error occured while finding courses..."})
-//     }
-// })
-
-// studentRoute.post("/api/std",async (req,res)=>{
-//     try{
-//         const course= await studentModel.create(req.body)
-//         res.status(200).json({msg:"Student created:",course})
-//     }catch(err){
-//         console.log(err);
-//         res.status(400).json({msg:"error occured while creating student..."})
-//     }
-// })
-
-
-// studentRoute.patch("/api/std/:id",async (req,res)=>{
-//     try{
-//         const student=await studentModel.findByIdAndUpdate(req.params.id,req.body,{new:true})
-//         if(!student){
-//             res.status(404).json({msg:"Student Not Found"})
-//         }
-//         res.status(202).json({msg:"student updated successfully"})
-//     }catch(err){
-//         console.log(err);
-//         res.status(400).json({msg:"error occurred while updating student..."});
-
-//     }
-// })
-
-
-
-// studentRoute.delete("/api/std/:id",async(req,res)=>{
-//     try{
-//         const student=await studentModel.findByIdAndDelete(req.params.id);
-//         if(!student){
-//             res.status(404).json({msg:"Student Not Found"})
-//         }
-//     res.status(200).json({msg:"student deleted successfully..."})
-//     }catch(err){
-//         console.log(err);
-//         res.status(500).json({msg:"error occured while finding student..."})
-//     }
-
-// })
-
-// studentRoute.get("/api/std/search",async(req,res)=>{
-//     try{
-//         const searchTerm=req.query.q;
-//         const students=await studentModel.find({
-//             $or:[
-//                 {name:{$regex:searchTerm,$options:"i"}},
-//                 {course:{$regex:searchTerm,$options:"i"}},
-//                 {email:{$regex:searchTerm,$options:"i"}},
-//             ],
-//         });
-//         res.status(200).json({students})
-//     }catch(err){
-//         console.log(err);
-//         res.status(500).json({msg:"error occured while searching student..."})
-//     }
-// })
-
-
-// studentRoute.get("/api/dashboard/stats",async(req,res)=>{
-//     try{
-//         const stats=await getDashboardStats();
-//         res.status(200).json({stats})
-//     }catch(err){
-//         console.log(err);
-//         res.status(500).json({msg:"error occured in dashboard api..."})
-//     }
-// })
-
-
-// async function getDashboardStats() {
-//     const activeStudents=await studentModel.countDocuments({status:'active'});
-//     const totalCourses=await courseModel.countDocuments();
-//     const totalStudents=await studentModel.countDocuments();
-//     const activeCourses=await courseModel.countDocuments({status:'active'});
-//     const graduates=await studentModel.countDocuments({status:'inactive'});
-//     const courseCount=await studentModel.aggregate([{$group:{_id:'$course',count:{$sum:1}}}]);
-
-//     return {
-//         activeStudents,totalCourses,activeCourses,graduates,courseCount,totalStudents,
-//         successRate:totalStudents>0?Math.round((graduates/totalStudents)*100):0
-//     }
-// }
-
-
-
-
-
-// module.exports=studentRoute
 
 const express = require("express");
 const studentModel = require("../model/student.model");
 const courseModel = require("../model/course.model");
-
+const cors = require("cors");
 const studentRoute = express.Router();
 
 // Get Students List (with courses)
@@ -126,7 +17,19 @@ studentRoute.get("/api/std", async (req, res) => {
     }
 });
 
+studentRoute.get("/api/std/:id",async(req,res)=>{
+    try{
+        const students=await studentModel.findById(req.params.id)
+        if(!students){
+            res.status(404).json({msg:"student Not Found"})
+        }
+    res.status(200).json({msg:`${req.params.id} Student data:`,students})
+    }catch(err){
+        console.log(err);
+        res.status(500).json({msg:"error occured while finding student..."})
+    }
 
+})
 // Create Student (Ensure Course Exists)
 const mongoose = require("mongoose");
 
@@ -208,7 +111,14 @@ studentRoute.post("/api/std", async (req, res) => {
 //     }
 // });
 studentRoute.patch("/api/std/:id", async (req, res) => {
-    console.log("Received PATCH request for ID:", req.params.id); // Debugging line
+    console.log("Received PATCH request for ID:", req.params.id);
+  
+    // Ensure the request body contains valid data
+    const { name, email, course, enrollmentDate } = req.body;
+    if (!name || !email || !course || !enrollmentDate) {
+      return res.status(400).json({ msg: "Missing required fields" ,name,email});
+    }
+  
     try {
       const student = await studentModel.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate("course");
       if (!student) {
@@ -220,6 +130,7 @@ studentRoute.patch("/api/std/:id", async (req, res) => {
       res.status(400).json({ msg: "Error occurred while updating student..." });
     }
   });
+  
   
 // Delete Student
 studentRoute.delete("/api/std/:id", async (req, res) => {
@@ -235,23 +146,46 @@ studentRoute.delete("/api/std/:id", async (req, res) => {
     }
 });
 
-// Search Student
+
+
+
+
 studentRoute.get("/api/std/search", async (req, res) => {
     try {
-        const searchTerm = req.query.q;
-        const students = await studentModel.find({  // Fix: Use `find`, not `fing`
+        console.log("API hit");
+
+        const searchTerm = req.query.q?.trim();
+        if (!searchTerm || typeof searchTerm !== "string") {
+            return res.status(400).json({ msg: "Invalid search query" });
+        }
+
+        let query = {
             $or: [
                 { name: { $regex: searchTerm, $options: "i" } },
                 { course: { $regex: searchTerm, $options: "i" } },
                 { email: { $regex: searchTerm, $options: "i" } },
             ],
-        });
-        res.status(200).json({ students }); // Ensure correct response format
+        };
+
+        // ✅ Only search by ID if it's a **valid ObjectId**
+        if (mongoose.Types.ObjectId.isValid(searchTerm)) {
+            query = { _id: new mongoose.Types.ObjectId(searchTerm) };
+        }
+
+        const students = await studentModel.find(query);
+
+        if (students.length === 0) {
+            return res.status(404).json({ msg: "No students found" });
+        }
+
+        res.status(200).json(students);
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ msg: "Error occurred while searching students..." });
+        console.error("Error searching students:", err);
+        res.status(500).json({ msg: "Internal server error" });
     }
 });
+
+
 
 
 // Dashboard Stats

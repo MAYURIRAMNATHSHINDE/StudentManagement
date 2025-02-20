@@ -5,7 +5,7 @@ const studentSchema=new mongoose.Schema(
     {
         name:{type:String,required:true},
         email:{type:String,required:true,unique:true},
-        course: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+        course: [{ type: mongoose.Schema.Types.ObjectId, ref: "course" }],
         enrollmentDate: { type: Date, required: true, default: Date.now }
         ,
         status:{
@@ -20,7 +20,7 @@ const studentSchema=new mongoose.Schema(
 )
 
 
-const studentModel=mongoose.model("Student",studentSchema)
+const studentModel=mongoose.model("students",studentSchema)
 
 
 module.exports=studentModel
